@@ -1,6 +1,11 @@
 rm(list=ls())
 library(ncdf4)
-path = '/Users/lezi/Desktop/data/'#'D:/Nature_comments_20240303/data/Ocean_moisture/'
+
+source('.../R_function/find_location.R')
+source('.../R_function/area_mask.R')
+
+
+path = '.../Desktop/data/'
 files = list.files(path,'nc')
 nfiles = length(files)
 
@@ -15,10 +20,16 @@ for (ifile in 1:3) {
   etime = (2015-year0)*12+12
   nyears = 2015-2003+1
   file = nc_open(paste0(path,files[ifile]))
-  Wo_mm_annual = apply(ncvar_get(file,'western_oceans_contribution_absolute')[,,stime:stime],c(3),mean,na.rm=T)
-  IO_mm_annual = apply(ncvar_get(file,'indian_ocean_contribution_absolute')[,,stime:stime],c(3),mean,na.rm=T)
-  Wo_percent_annual = apply(ncvar_get(file,'western_oceans_contribution_relative')[,,stime:stime],c(3),mean,na.rm=T)
-  Io_percent_annual = apply(ncvar_get(file,'indian_ocean_contribution_relative')[,,stime:stime],c(3),mean,na.rm=T)
+  longitude = ncvar_get(file,'longitude')
+  latitude = ncvar_get(file,'latitude')
+  lon_loc = lon_region(longitude,lon1,lon2)
+  lat_loc = lat_region(latitude,lat1,lat2)
+  indexlon1 = lon_loc[[1]][1];indexlon2 = lon_loc[[2]][1]
+  indexlat1 = lat_loc[[1]][1];indexlat2 = lat_loc[[2]][1]
+  Wo_mm_annual = apply(ncvar_get(file,'western_oceans_contribution_absolute')[indexlon1:indexlon2,indexlat1:indexlat2,stime:stime],c(3),mean,na.rm=T)
+  IO_mm_annual = apply(ncvar_get(file,'indian_ocean_contribution_absolute')[indexlon1:indexlon2,indexlat1:indexlat2,stime:stime],c(3),mean,na.rm=T)
+  Wo_percent_annual = apply(ncvar_get(file,'western_oceans_contribution_relative')[indexlon1:indexlon2,indexlat1:indexlat2,stime:stime],c(3),mean,na.rm=T)
+  Io_percent_annual = apply(ncvar_get(file,'indian_ocean_contribution_relative')[indexlon1:indexlon2,indexlat1:indexlat2,stime:stime],c(3),mean,na.rm=T)
   lon = ncvar_get(file,'longitude')
   lat = ncvar_get(file,'latitude')
   nc_close(file)
